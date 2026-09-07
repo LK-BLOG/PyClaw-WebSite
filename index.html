@@ -385,7 +385,7 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
       <ul>
         <li>FastAPI + Uvicorn + WebSocket</li>
         <li>浏览器、手机、局域网随时访问</li>
-        <li>SSE 流式输出,打字机体验</li>
+        <li>WebSocket 流式输出,打字机体验</li>
       </ul>
     </div>
     <div class="mode-card reveal d3">
@@ -393,9 +393,9 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
       <h3>命令行模式</h3>
       <span class="cmd">pyclaw chat "你好"</span>
       <ul>
-        <li>一句话问答,零界面负担</li>
-        <li>适合脚本、管道与自动化</li>
-        <li>pyclaw shell 进入交互式对话</li>
+        <li>一句话问答,零界面负担,适合脚本与管道</li>
+        <li>pyclaw shell 进入 Codex 风格 TUI,rich 渲染、思考过程与工具调用卡片</li>
+        <li>Ctrl+P 命令面板 · /new /sessions /compact /exit,直接管理会话</li>
       </ul>
     </div>
   </div>
@@ -488,13 +488,14 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
     <div class="install-copy reveal">
       <div class="pill"><span>Get Started</span></div>
       <h3>一行命令,<span class="hl">从零到跑</span></h3>
-      <p>一条 Bash 命令搞定安装,Windows 的 Git Bash 同样兼容;开发者也可以从源码构建。整个框架安装体积约 10MB,常驻内存约 50MB,轻得不像是带插件系统的。</p>
+      <p>一条 Bash 命令搞定安装,Windows 的 Git Bash 同样兼容;开发者也可以从源码构建。整个框架核心代码约 1MB,常驻内存约 70MB(主要是 Python 解释器与依赖),轻得不像是带插件系统的。</p>
       <div class="cmd-grid">
         <div class="cmd-row"><span class="k">setup</span><span class="v">pyclaw setup — 配置向导</span></div>
         <div class="cmd-row"><span class="k">start</span><span class="v">pyclaw start — 桌面 / Web / 后台</span></div>
         <div class="cmd-row"><span class="k">chat</span><span class="v">pyclaw chat "你好" — 一句话问答</span></div>
         <div class="cmd-row"><span class="k">shell</span><span class="v">pyclaw shell — 交互式对话</span></div>
         <div class="cmd-row"><span class="k">status</span><span class="v">pyclaw status / stop — 状态与停止</span></div>
+        <div class="cmd-row"><span class="k">config</span><span class="v">pyclaw config / version — 配置与版本</span></div>
       </div>
     </div>
     <div class="terminal reveal d2">
@@ -515,7 +516,7 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
         <div class="row">
           <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pc-bf" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#3776AB"/><stop offset="100%" stop-color="#2B5B8A"/></linearGradient><linearGradient id="pc-yf" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FFD43B"/><stop offset="100%" stop-color="#E5BE2D"/></linearGradient></defs><path d="M60 10 C30 10 15 35 15 55 C15 75 30 95 45 100 L45 110 L55 110 L55 100 L60 102 L60 10 Z" fill="url(#pc-bf)"/><path d="M60 10 C90 10 105 35 105 55 C105 75 90 95 75 100 L75 110 L65 110 L65 100 L60 102 L60 10 Z" fill="url(#pc-yf)"/><path d="M20 45 C5 40 0 50 5 60 C10 70 20 65 25 55 C28 48 25 45 20 45Z" fill="url(#pc-bf)"/><path d="M100 45 C115 40 120 50 115 60 C110 70 100 65 95 55 C92 48 95 45 100 45Z" fill="url(#pc-yf)"/><circle cx="45" cy="35" r="6" fill="#0d1117"/><circle cx="75" cy="35" r="6" fill="#0d1117"/><circle cx="43" cy="33" r="3" fill="#73d2ff"/><circle cx="73" cy="33" r="3" fill="#73d2ff"/><path d="M45 15 Q35 5 30 8" stroke="#3776AB" stroke-width="3" stroke-linecap="round"/><path d="M75 15 Q85 5 90 8" stroke="#FFD43B" stroke-width="3" stroke-linecap="round"/></svg>
           <span class="name">PyClaw</span>
-          <span class="badge-mini">v0.6.4.4.1</span>
+          <span class="badge-mini">v0.6.4.4.2</span>
         </div>
         <p>跨平台 AI 助手框架 · 桌面 + Web + CLI。作者 Campus & His OpenClaw,灵感来自 OpenClaw 生态。</p>
       </div>
@@ -548,7 +549,7 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
       </div>
     </div>
     <div class="footer-bottom">
-      <span class="license">开源 · <b style="color:var(--text-primary)">GPL v3.0</b> · Python 3.9–3.12 · ~10MB / ~50MB 内存</span>
+      <span class="license">开源 · <b style="color:var(--text-primary)">GPL v3.0</b> · Python 3.9–3.12 · 核心 ~1MB / 内存 ~70MB</span>
       <span>© 2026 Campus & His OpenClaw · 数据留在本地</span>
     </div>
   </div>
