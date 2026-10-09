@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>PyClaw Lite · 一把 exec 走天下</title>
-<meta name="description" content="PyClaw Lite 是 PyClaw 内核的重写版:2854 行 Python、12 个模块、只有一个 exec 工具、只依赖 openai 包。权限三级、上下文压缩、会话落盘、MCP 客户端、12 个钩子事件、20+ 供应商——完整版没有的,这里全有。"/>
+<meta name="description" content="PyClaw Lite 是 PyClaw 内核的重写版:2854 行 Python、12 个模块、只有一个 exec 工具、只依赖 openai + prompt_toolkit + rich。权限三级、上下文压缩、文件式长期记忆、MCP 客户端、12 个钩子事件、20+ 供应商——完整版没有的,这里全有。"/>
 <meta name="theme-color" content="#0a0a0c"/>
 <link rel="canonical" href="https://pyclaw.pages.dev/lite/"/>
 <meta property="og:title" content="PyClaw Lite · 一把 exec 走天下"/>
@@ -348,11 +348,11 @@ footer{border-top:1px solid var(--border-subtle);padding:76px 0 44px;margin-top:
     <div class="hero-copy">
       <div class="hero-badge rise rise-1"><span class="dot"></span>v0.0.1-beta.2 · Rewritten Core</div>
       <h1 class="rise rise-2">一把 <span class="grad">exec</span>,<br/>走遍天下。</h1>
-      <p class="hero-sub rise rise-3">PyClaw Lite 是 PyClaw 内核的<b style="color:var(--text-primary)">重写版</b>:2854 行 Python、12 个模块、只有一个内置工具、一个依赖。权限分级、上下文压缩、会话落盘、MCP、钩子引擎——完整版里没有的,这里全有。想读文件? <code style="font-family:var(--font-mono);font-size:13.5px;color:#9cc0ff">cat</code>。想装包? <code style="font-family:var(--font-mono);font-size:13.5px;color:#9cc0ff">pip</code>。AI 自己动手。</p>
+      <p class="hero-sub rise rise-3">PyClaw Lite 是 PyClaw 内核的<b style="color:var(--text-primary)">重写版</b>:2854 行 Python、12 个模块、只有一个内置工具。权限分级、上下文压缩、会话落盘、MCP、钩子引擎——完整版里没有的,这里全有。想读文件? <code style="font-family:var(--font-mono);font-size:13.5px;color:#9cc0ff">cat</code>。想装包? <code style="font-family:var(--font-mono);font-size:13.5px;color:#9cc0ff">pip</code>。AI 自己动手。</p>
       <div class="hero-stat rise rise-5">
         <div class="hs"><b>2854</b><span>行 PYTHON</span></div>
         <div class="hs"><b>1</b><span>个工具</span></div>
-        <div class="hs"><b>1</b><span>个依赖</span></div>
+        <div class="hs"><b>3</b><span>个依赖</span></div>
         <div class="hs"><b>12</b><span>钩子事件</span></div>
       </div>
       <div class="hero-ctas rise rise-4">
@@ -411,7 +411,7 @@ footer{border-top:1px solid var(--border-subtle);padding:76px 0 44px;margin-top:
       <span class="tag">PyClaw Lite</span>
       <h3>一把刀</h3>
       <p>只有一个 <code>exec</code>。读文件 <code>cat</code>,装包 <code>pip</code>,爬网页 <code>curl</code>,分析数据写个脚本 <code>python</code> 跑。系统提示词就一句话:<b style="color:var(--text-primary)">别猜,读文件、看输出、再动手</b>。</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tool-chip" style="color:var(--accent);border-color:hsla(158,70%,55%,.3)">exec</span><span class="tool-chip">2854 LOC</span><span class="tool-chip">1 dep</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tool-chip" style="color:var(--accent);border-color:hsla(158,70%,55%,.3)">exec</span><span class="tool-chip">2854 LOC</span><span class="tool-chip">3 deps</span></div>
     </div>
   </div>
 </section>
@@ -470,6 +470,12 @@ footer{border-top:1px solid var(--border-subtle);padding:76px 0 44px;margin-top:
     </div>
     <div class="card mid reveal d1">
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5V17c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8V5.5M4 11.2c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8"/></svg></div>
+      <h3>文件式长期记忆</h3>
+      <p><code>memory/</code> 下的 <code>.md/.txt/.json</code> 全文注入 system prompt——写进去,下次启动它就记得。比 SQLite 少一层,也不多一个依赖。</p>
+      <div class="tools"><span class="tool-chip">memory/notes</span><span class="tool-chip">全量注入</span></div>
+    </div>
+    <div class="card reveal d2">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg></div>
       <h3>会话落盘</h3>
       <p>追加式事件日志 + 索引,<code>--continue</code> 续上次,<code>--session</code> 精确回到某一次。</p>
     </div>
@@ -601,14 +607,14 @@ footer{border-top:1px solid var(--border-subtle);padding:76px 0 44px;margin-top:
     <div class="install-copy reveal">
       <div class="pill" style="align-self:flex-start"><span>Get Started</span></div>
       <h3>四条命令,<span class="hl">从零到跑</span></h3>
-      <p>只需要 Python 3.10+ 和 <code style="font-family:var(--font-mono);font-size:13px;color:#9cc0ff">pip install openai</code>。install.sh 会顺手建好 history / memory / plugins 目录,可以反复跑。</p>
+      <p>需要 Python 3.10+。install.sh 会装好三个运行时依赖(<code style="font-family:var(--font-mono);font-size:13px;color:#9cc0ff">openai</code> 管接口、<code style="font-family:var(--font-mono);font-size:13px;color:#9cc0ff">prompt_toolkit</code> + <code style="font-family:var(--font-mono);font-size:13px;color:#9cc0ff">rich</code> 管 TUI),顺手建好 history / memory / plugins 目录,可以反复跑。</p>
       <div class="cmd-grid">
-        <div class="cmd-row"><span class="k">install</span><span class="v">./install.sh — 装依赖、建目录</span></div>
+        <div class="cmd-row"><span class="k">install</span><span class="v">./install.sh — 装 openai + prompt_toolkit + rich</span></div>
         <div class="cmd-row"><span class="k">config</span><span class="v">cp pyclaw.json.example pyclaw.json — 填 KEY</span></div>
         <div class="cmd-row"><span class="k">run</span><span class="v">python main.py — 进 TUI</span></div>
-        <div class="cmd-row"><span class="k">plain</span><span class="v">python main.py --plain — 极简 CLI</span></div>
+        <div class="cmd-row"><span class="k">plain</span><span class="v">python main.py --plain — 极简 CLI,不需要 prompt_toolkit/rich</span></div>
         <div class="cmd-row"><span class="k">resume</span><span class="v">python main.py --continue — 续上次会话</span></div>
-        <div class="cmd-row"><span class="k">tests</span><span class="v">pytest — 9 组测试全部通过</span></div>
+        <div class="cmd-row"><span class="k">tests</span><span class="v">pytest — 85 项测试全部通过</span></div>
       </div>
     </div>
     <div class="terminal reveal d2">
@@ -644,11 +650,11 @@ footer{border-top:1px solid var(--border-subtle);padding:76px 0 44px;margin-top:
         <tr><td>供应商 / 模型窗口表</td><td><b style="color:var(--accent)">20+ 供应商自动推断</b></td><td>手工配置</td></tr>
         <tr><td>上下文计量与压缩</td><td><b style="color:var(--accent)">独立模块 + 输出落盘</b></td><td>有压缩,无独立计量</td></tr>
         <tr><td>会话持久化</td><td>追加式事件日志 + 索引</td><td>SQLite</td></tr>
-        <tr><td>长期记忆</td><td>无</td><td><b style="color:var(--text-primary)">SQLite 记忆库</b></td></tr>
+        <tr><td>长期记忆</td><td><b style="color:var(--accent)">文件式(全量注入 memory/)</b></td><td><b style="color:var(--text-primary)">SQLite 记忆库(带工具可查)</b></td></tr>
         <tr><td>子 Agent</td><td>配置式角色</td><td><b style="color:var(--text-primary)">delegate_to 运行时委派</b></td></tr>
         <tr><td>运行形态</td><td>TUI + 朴素 CLI</td><td><b style="color:var(--text-primary)">桌面 GUI + Web + CLI</b></td></tr>
         <tr><td>交付方式</td><td>git clone + ./install.sh</td><td><b style="color:var(--text-primary)">NSIS 一键安装包</b></td></tr>
-        <tr><td>依赖</td><td>1(openai)</td><td>多依赖(pywebview 等)</td></tr>
+        <tr><td>依赖</td><td>3(openai / prompt_toolkit / rich)</td><td>多依赖(pywebview 等)</td></tr>
       </tbody>
     </table>
   </div>
@@ -658,8 +664,8 @@ footer{border-top:1px solid var(--border-subtle);padding:76px 0 44px;margin-top:
 <section class="container" id="pyclaw" style="padding-top:0">
   <div class="cross reveal">
     <div>
-      <h3>想要开箱即用的插件和长期记忆?<br/>去看 PyClaw 完整版。</h3>
-      <p>8 个预装插件(视频剪辑、PPT、B 站发布、天气、系统监控……)、36 个扩展工具 + 6 个内置工具、SQLite 长期记忆、桌面 / Web / CLI 三形态、NSIS 一键安装包。Lite 重写的是内核架构,完整版厚的是开箱生态——两边的活不一样,主站依然是完整版的家。</p>
+      <h3>想要开箱即用的插件?<br/>去看 PyClaw 完整版。</h3>
+      <p>8 个预装插件(视频剪辑、PPT、B 站发布、天气、系统监控……)、36 个扩展工具 + 6 个内置工具、SQLite 记忆库、桌面 / Web / CLI 三形态、NSIS 一键安装包。Lite 重写的是内核架构,完整版厚的是开箱生态——两边的活不一样,主站依然是完整版的家。</p>
     </div>
     <div class="cross-actions">
       <a class="btn btn-primary" href="../index.html">
@@ -706,7 +712,7 @@ footer{border-top:1px solid var(--border-subtle);padding:76px 0 44px;margin-top:
       </div>
     </div>
     <div class="footer-bottom">
-      <span>开源 · <b style="color:var(--text-primary)">GPL v3.0</b> · Python 3.10+ · 2854 行 · 1 个依赖</span>
+      <span>开源 · <b style="color:var(--text-primary)">GPL v3.0</b> · Python 3.10+ · 2854 行 · 3 个依赖</span>
       <span>© 2026 Campus &amp; His OpenClaw · 数据留在本地</span>
     </div>
   </div>
@@ -772,7 +778,7 @@ Object.keys(terms).filter(k=>k!=='termPre').forEach(renderTerm);
 
 // 跑马灯:能力标签无限滚动
 (function(){
-  const items=['一个工具:exec','2854 行 Python','12 个模块','1 个依赖:openai','20+ 供应商','12 个钩子事件','MCP stdio / HTTP','上下文自动压缩','命令分段防绕过','会话追加式落盘','Codex 风 TUI','SKILL.md 自进化','Python 3.10+','GPL v3.0','数据留在本地'];
+  const items=['一个工具:exec','2854 行 Python','12 个模块','3 个依赖:openai + prompt_toolkit + rich','20+ 供应商','12 个钩子事件','MCP stdio / HTTP','上下文自动压缩','命令分段防绕过','文件式长期记忆','Codex 风 TUI','SKILL.md 自进化','Python 3.10+','GPL v3.0','数据留在本地'];
   const track=document.getElementById('mqTrack');
   const html=items.map((t,i)=>'<span class="mi'+(i%2?' b':'')+'"><i></i>'+t+'</span>').join('');
   track.innerHTML=html+html;
