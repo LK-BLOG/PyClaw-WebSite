@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>PyClaw · 一个 Agent,走遍天下</title>
-<meta name="description" content="PyClaw 是跨平台 AI 助手框架:桌面、Web、CLI 三种模式,多 Agent 架构,8 个预装插件、36+ 内置工具,数据留在本地。"/>
+<meta name="description" content="PyClaw 是跨平台 AI 助手框架:桌面、Web、CLI 三种模式,多 Agent 架构,8 个预装插件、42 个工具(6 内置 + 36 扩展),SQLite 长期记忆,数据留在本地。"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Host+Grotesk:wght@500;600;700&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet"/>
@@ -300,7 +300,7 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
     <div class="hero-copy">
       <div class="hero-badge rise rise-1"><span class="dot"></span>PyClaw v0.6.4.4.2 · Beta</div>
       <h1 class="rise rise-2">一个 Agent,<br/><span class="grad">走遍天下</span></h1>
-      <p class="hero-sub rise rise-3">PyClaw 是跨平台 AI 助手框架——桌面、Web、命令行,一套配置随处跑。多 Agent 架构 + 8 个预装插件 + 36+ 内置工具,数据留在本地,能力握在自己手里。</p>
+      <p class="hero-sub rise rise-3">PyClaw 是跨平台 AI 助手框架——桌面、Web、命令行,一套配置随处跑。多 Agent 架构 + 8 个预装插件 + 42 个工具(6 内置 + 36 扩展),SQLite 长期记忆,数据留在本地,能力握在自己手里。</p>
       <div class="hero-ctas rise rise-4">
         <a class="btn btn-primary" href="https://github.com/LK-BLOG/PyClaw" target="_blank" rel="noopener noreferrer">
           <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
@@ -348,7 +348,7 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
       <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h3v3a2 2 0 0 0 4 0V3h3a2 2 0 0 1 2 2v3h-3a2 2 0 0 0 0 4h3v3a2 2 0 0 1-2 2h-3v-3a2 2 0 0 0-4 0v3H6a2 2 0 0 1-2-2v-3h3a2 2 0 0 0 0-4H4z"/></svg></div>
       <h3>Skills 即插即用</h3>
       <span class="en">Skills as Plugins</span>
-      <p>8 个预装插件、36+ 工具,用 Markdown 声明式或 Python 类就能扩展。装了就有的用,不装也不碍事。</p>
+      <p>8 个预装插件、36 个扩展工具 + 6 个内置工具,用 Markdown 声明式或 Python 类就能扩展。装了就有的用,不装也不碍事。</p>
       <div class="tools"><span class="tool-chip">LK-Cut</span><span class="tool-chip">PPT</span><span class="tool-chip">Weather</span><span class="tool-chip">Bilibili</span><span class="tool-chip">+4</span></div>
     </div>
     <div class="card reveal d3">
@@ -404,7 +404,7 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
 <!-- ============ PLUGINS ============ -->
 <section class="container" id="plugins">
   <div class="sec-head reveal">
-    <div class="pill"><span>8 Plugins · 36+ Tools</span></div>
+    <div class="pill"><span>8 Plugins · 42 Tools</span></div>
     <h2>装了就有的用,<span class="hl">不装也不碍事</span></h2>
     <p>视频剪辑、PPT 生成、天气查询、B 站发布……预装 8 个插件,开箱即用。插件用 Markdown 或 Python 写,扩展没有门槛。</p>
   </div>
@@ -424,9 +424,9 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
 <section class="container" id="lite">
   <div class="lite-wrap">
     <div class="lite-copy reveal">
-      <div class="pill"><span>PyClaw Lite · Independent Project</span></div>
-      <h3>想要更轻,但更强? 试试 <span class="hl">PyClaw Lite</span></h3>
-      <p>PyClaw Lite 是 PyClaw 的轻量分支,独立仓库、独立节奏,一把 <b style="color:var(--text-primary)">exec</b> 走天下。2854 行 Python、12 个模块、只有一个内置工具——但权限分级、上下文压缩、会话落盘、MCP、12 个钩子事件,一个都没少。</p>
+      <div class="pill"><span>PyClaw Lite · Rewritten Core</span></div>
+      <h3>想要更轻,但内核更强? 试试 <span class="hl">PyClaw Lite</span></h3>
+      <p>PyClaw Lite 是 PyClaw 内核的<b style="color:var(--text-primary)">重写版</b>——独立仓库、独立节奏,一把 <b style="color:var(--text-primary)">exec</b> 走天下。2854 行 Python、12 个模块、只有一个内置工具,但权限分级、上下文压缩、会话落盘、MCP、12 个钩子事件、20+ 供应商表,完整版里没有的它全有。完整版厚在插件与桌面交付,两边的活不一样。</p>
       <div class="lite-feats">
         <div class="item"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div><div><b>只有一个工具:exec</b><span>想读文件? cat。想装包? pip。想爬网页? curl。AI 自己动手,什么都能切;能力写在 skills/ 里,不写在框架里。</span></div></div>
         <div class="item"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg></div><div><b>依赖极简</b><span>只需一个 openai 包,装完即跑;要求 Python 3.10+。20+ 供应商走同一套 OpenAI 兼容协议。</span></div></div>
@@ -550,7 +550,7 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
           <b>项目</b>
           <a href="https://github.com/LK-BLOG/PyClaw" target="_blank" rel="noopener noreferrer">PyClaw · 完整版</a>
           <a href="lite/index.html">PyClaw Lite · 官网</a>
-          <a href="https://github.com/LK-BLOG/pyclaw-lite" target="_blank" rel="noopener noreferrer">PyClaw Lite · 轻量版</a>
+          <a href="https://github.com/LK-BLOG/pyclaw-lite" target="_blank" rel="noopener noreferrer">PyClaw Lite · 内核重写版</a>
           <a href="https://github.com/LK-BLOG/F-kAgent" target="_blank" rel="noopener noreferrer">FuckAgent · 情绪发泄按钮</a>
         </div>
       </div>

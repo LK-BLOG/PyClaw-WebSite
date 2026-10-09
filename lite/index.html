@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>PyClaw Lite · 一把 exec 走天下</title>
-<meta name="description" content="PyClaw Lite 是 PyClaw 的轻量分支:2854 行 Python、12 个模块、只有一个 exec 工具、只依赖 openai 包。权限三级、上下文压缩、会话落盘、MCP、12 个钩子事件,一个都没少。"/>
+<meta name="description" content="PyClaw Lite 是 PyClaw 内核的重写版:2854 行 Python、12 个模块、只有一个 exec 工具、只依赖 openai 包。权限三级、上下文压缩、会话落盘、MCP 客户端、12 个钩子事件、20+ 供应商——完整版没有的,这里全有。"/>
 <meta name="theme-color" content="#0a0a0c"/>
 <link rel="canonical" href="https://pyclaw.pages.dev/lite/"/>
 <meta property="og:title" content="PyClaw Lite · 一把 exec 走天下"/>
@@ -245,8 +245,12 @@ h1 .grad{filter:drop-shadow(0 0 36px hsla(158,70%,55%,.4))}
 
 /* config table */
 .table-wrap{overflow-x:auto;border:1px solid var(--border-subtle);border-radius:var(--radius-lg);background:hsla(0,0%,100%,.02)}
-table{width:100%;border-collapse:collapse;min-width:620px}
-th,td{text-align:left;padding:14px 20px;font-size:13.5px;border-bottom:1px solid var(--border-subtle);letter-spacing:.03em}
+table{width:100%;border-collapse:collapse;min-width:620px;table-layout:fixed}
+th,td{text-align:left;padding:14px 20px;font-size:13.5px;border-bottom:1px solid var(--border-subtle);letter-spacing:.03em;overflow-wrap:break-word}
+th:first-child,td:first-child{width:22%}
+#config table{min-width:620px}
+#compare table{min-width:820px;table-layout:fixed}
+#compare td:nth-child(2),#compare td:nth-child(3),#compare th:nth-child(2),#compare th:nth-child(3){width:37%}
 th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary);font-weight:500;background:hsla(0,0%,100%,.03)}
 td:first-child{font-family:var(--font-mono);font-size:12.5px;color:#9cc0ff;white-space:nowrap}
 td{color:var(--text-tertiary)}
@@ -329,6 +333,7 @@ footer{border-top:1px solid var(--border-subtle);padding:76px 0 44px;margin-top:
       <a class="hide-m" href="#power">能力</a>
       <a class="hide-m" href="#arch">架构</a>
       <a class="hide-m" href="#install">安装</a>
+      <a class="hide-m" href="#compare">对比</a>
       <a class="nav-home" href="../index.html">← PyClaw 主站</a>
       <a href="https://github.com/LK-BLOG/pyclaw-lite" target="_blank" rel="noopener noreferrer" class="nav-cta">GitHub</a>
     </nav>
@@ -341,9 +346,9 @@ footer{border-top:1px solid var(--border-subtle);padding:76px 0 44px;margin-top:
 <section class="hero">
   <div class="container hero-inner">
     <div class="hero-copy">
-      <div class="hero-badge rise rise-1"><span class="dot"></span>v0.0.1-beta.2 · Independent Project</div>
+      <div class="hero-badge rise rise-1"><span class="dot"></span>v0.0.1-beta.2 · Rewritten Core</div>
       <h1 class="rise rise-2">一把 <span class="grad">exec</span>,<br/>走遍天下。</h1>
-      <p class="hero-sub rise rise-3">PyClaw Lite 是 PyClaw 的轻量分支:2854 行 Python、12 个模块、只有一个内置工具、一个依赖。没有插件生态要维护,没有工具链要学习——想读文件? <code style="font-family:var(--font-mono);font-size:13.5px;color:#9cc0ff">cat</code>。想装包? <code style="font-family:var(--font-mono);font-size:13.5px;color:#9cc0ff">pip</code>。AI 自己动手,什么都能切。</p>
+      <p class="hero-sub rise rise-3">PyClaw Lite 是 PyClaw 内核的<b style="color:var(--text-primary)">重写版</b>:2854 行 Python、12 个模块、只有一个内置工具、一个依赖。权限分级、上下文压缩、会话落盘、MCP、钩子引擎——完整版里没有的,这里全有。想读文件? <code style="font-family:var(--font-mono);font-size:13.5px;color:#9cc0ff">cat</code>。想装包? <code style="font-family:var(--font-mono);font-size:13.5px;color:#9cc0ff">pip</code>。AI 自己动手。</p>
       <div class="hero-stat rise rise-5">
         <div class="hs"><b>2854</b><span>行 PYTHON</span></div>
         <div class="hs"><b>1</b><span>个工具</span></div>
@@ -619,12 +624,42 @@ footer{border-top:1px solid var(--border-subtle);padding:76px 0 44px;margin-top:
   </div>
 </section>
 
+<!-- ============ COMPARE ============ -->
+<section class="container" id="compare">
+  <div class="sec-head reveal">
+    <div class="pill"><span>Lite vs Full · Honest</span></div>
+    <h2>哪边强?<span class="hl">各强各的</span></h2>
+    <p>Lite 是内核重写,完整版是生态沉淀。不吹哪边通吃——按你需要什么挑。</p>
+  </div>
+  <div class="table-wrap reveal d1">
+    <table>
+      <thead><tr><th>能力</th><th>PyClaw Lite</th><th>PyClaw 完整版</th></tr></thead>
+      <tbody>
+        <tr><td>核心代码量</td><td>2854 行 / 12 模块</td><td>4515 行 / 17 模块</td></tr>
+        <tr><td>内置工具</td><td>1(exec)</td><td>6(read_file / exec_command / web_search …)</td></tr>
+        <tr><td>预装插件 / 扩展工具</td><td>1 示例(feishu)</td><td><b style="color:var(--text-primary)">8 个插件 · 36 个工具</b></td></tr>
+        <tr><td>权限系统</td><td><b style="color:var(--accent)">三级 + 命令分段 + 内置黑名单</b></td><td>无</td></tr>
+        <tr><td>钩子引擎</td><td><b style="color:var(--accent)">12 事件 / 4 处理器</b></td><td>无</td></tr>
+        <tr><td>MCP 客户端</td><td><b style="color:var(--accent)">stdio + HTTP</b></td><td>无</td></tr>
+        <tr><td>供应商 / 模型窗口表</td><td><b style="color:var(--accent)">20+ 供应商自动推断</b></td><td>手工配置</td></tr>
+        <tr><td>上下文计量与压缩</td><td><b style="color:var(--accent)">独立模块 + 输出落盘</b></td><td>有压缩,无独立计量</td></tr>
+        <tr><td>会话持久化</td><td>追加式事件日志 + 索引</td><td>SQLite</td></tr>
+        <tr><td>长期记忆</td><td>无</td><td><b style="color:var(--text-primary)">SQLite 记忆库</b></td></tr>
+        <tr><td>子 Agent</td><td>配置式角色</td><td><b style="color:var(--text-primary)">delegate_to 运行时委派</b></td></tr>
+        <tr><td>运行形态</td><td>TUI + 朴素 CLI</td><td><b style="color:var(--text-primary)">桌面 GUI + Web + CLI</b></td></tr>
+        <tr><td>交付方式</td><td>git clone + ./install.sh</td><td><b style="color:var(--text-primary)">NSIS 一键安装包</b></td></tr>
+        <tr><td>依赖</td><td>1(openai)</td><td>多依赖(pywebview 等)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
 <!-- ============ CROSS LINK ============ -->
 <section class="container" id="pyclaw" style="padding-top:0">
   <div class="cross reveal">
     <div>
-      <h3>需要全套家伙什?<br/>去看完整版 PyClaw。</h3>
-      <p>八个预装插件、36+ 内置工具、桌面 / Web / CLI 三种形态、SQLite 长期记忆——Lite 的每一分克制,完整版都有对应的放纵。</p>
+      <h3>想要开箱即用的插件和长期记忆?<br/>去看 PyClaw 完整版。</h3>
+      <p>8 个预装插件(视频剪辑、PPT、B 站发布、天气、系统监控……)、36 个扩展工具 + 6 个内置工具、SQLite 长期记忆、桌面 / Web / CLI 三形态、NSIS 一键安装包。Lite 重写的是内核架构,完整版厚的是开箱生态——两边的活不一样,主站依然是完整版的家。</p>
     </div>
     <div class="cross-actions">
       <a class="btn btn-primary" href="../index.html">
@@ -647,7 +682,7 @@ footer{border-top:1px solid var(--border-subtle);padding:76px 0 44px;margin-top:
           <span class="name">PyClaw Lite</span>
           <span class="badge-mini">v0.0.1-beta.2</span>
         </div>
-        <p>PyClaw 的轻量分支 · 一把 exec 走天下 · 独立仓库,独立节奏。单文件静态站,零构建。</p>
+        <p>PyClaw 内核的重写版 · 一把 exec 走天下 · 独立仓库,独立节奏。单文件静态站,零构建。</p>
       </div>
       <div class="footer-cols">
         <div class="col">
