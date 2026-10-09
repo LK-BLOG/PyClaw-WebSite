@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>PyClaw Lite · 一把 exec 走天下</title>
+<meta name="description" content="PyClaw Lite 是 PyClaw 的轻量分支:2854 行 Python、12 个模块、只有一个 exec 工具、只依赖 openai 包。权限三级、上下文压缩、会话落盘、MCP、12 个钩子事件,一个都没少。"/>
+<meta name="theme-color" content="#0a0a0c"/>
+<link rel="canonical" href="https://pyclaw.pages.dev/lite/"/>
+<meta property="og:title" content="PyClaw Lite · 一把 exec 走天下"/>
+<meta property="og:description" content="2854 行 Python,一个 exec 工具,零插件依赖。轻,但没变弱。"/>
+<meta property="og:type" content="website"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Host+Grotesk:wght@500;600;700&family=Fragment+Mono:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0a0a0c;
+  --text-primary:#fff;
+  --text-secondary:hsla(0,0%,100%,.8);
+  --text-tertiary:hsla(0,0%,100%,.58);
+  --brand:#4f8cff;
+  --brand-glow:hsla(213,100%,65%,.35);
+  --accent:#3ddc97;
+  --accent-glow:hsla(158,70%,55%,.3);
+  --surface-1:hsla(0,0%,100%,.07);
+  --surface-2:hsla(0,0%,100%,.05);
+  --surface-3:hsla(0,0%,100%,.03);
+  --border-subtle:hsla(0,0%,100%,.09);
+  --border-strong:hsla(0,0%,100%,.18);
+  --radius-xl:30px;
+  --radius-lg:22px;
+  --radius-md:16px;
+  --font-body:"DM Sans",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --font-display:"Host Grotesk","DM Sans",system-ui,sans-serif;
+  --font-mono:"Fragment Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans SC",monospace;
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --ease-spring:cubic-bezier(.34,1.3,.4,1);
+  --ease-smooth:cubic-bezier(.22,1,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0a0a0c;color:var(--text-primary);font-family:var(--font-body);letter-spacing:.025em;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;line-height:1.7}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+.container{max-width:1180px;margin:0 auto;padding:0 32px}
+section.container{padding:200px 32px}
+::selection{background:hsla(213,100%,65%,.35)}
+.grad{background:linear-gradient(100deg,#9cc0ff,var(--brand) 55%,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hl{background:linear-gradient(100deg,#9cc0ff,var(--brand) 60%,#74d4ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* header */
+.ds-header{position:fixed;top:0;left:0;right:0;z-index:50;transition:background .6s var(--ease-smooth)}
+.ds-header-bar{max-width:1180px;margin:0 auto;padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.ds-header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:transparent;transition:background .6s var(--ease-smooth)}
+.ds-header.scrolled{background:rgba(10,10,12,.6);-webkit-backdrop-filter:blur(26px) saturate(1.6);backdrop-filter:blur(26px) saturate(1.6)}
+.ds-header.scrolled::after{background:var(--border-subtle)}
+.ds-logo{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-weight:700;font-size:19px;letter-spacing:.01em}
+.ds-logo svg{width:29px;height:29px}
+.ds-logo .lite-tag{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.14em;color:var(--accent);border:1px solid hsla(158,70%,55%,.35);background:hsla(158,70%,55%,.1);border-radius:100px;padding:3px 9px;text-transform:uppercase}
+.ds-nav{display:flex;align-items:center;gap:30px;font-size:14px;font-weight:500;color:var(--text-secondary)}
+.ds-nav a:not(.nav-cta):not(.nav-home){transition:color .4s var(--ease-smooth)}
+.ds-nav a:not(.nav-cta):not(.nav-home):hover{color:var(--text-primary)}
+.ds-nav .nav-home{color:var(--text-tertiary);font-size:13px;transition:color .4s var(--ease-smooth)}
+.ds-nav .nav-home:hover{color:var(--brand)}
+.ds-nav .nav-cta{background:var(--text-primary);color:#0a0a0c;padding:9px 20px;border-radius:100px;font-weight:600;letter-spacing:.02em;transition:transform .5s var(--ease-spring),box-shadow .5s var(--ease-smooth)}
+.ds-nav .nav-cta:hover{transform:translateY(-2px);box-shadow:0 10px 26px hsla(0,0%,100%,.18)}
+.ds-nav .nav-cta:active{transform:scale(.96)}
+
+/* fixed bg scene */
+.bg-scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.glow{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55}
+.g1{width:620px;height:620px;left:-160px;top:-180px;background:radial-gradient(circle,var(--brand-glow),transparent 70%)}
+.g2{width:560px;height:560px;right:-180px;top:6%;background:radial-gradient(circle,var(--accent-glow),transparent 70%)}
+.g3{width:700px;height:700px;left:34%;top:56%;background:radial-gradient(circle,rgba(116,102,255,.22),transparent 70%)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(hsla(0,0%,100%,.045) 1px,transparent 1px),linear-gradient(90deg,hsla(0,0%,100%,.045) 1px,transparent 1px);background-size:88px 88px;mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 20%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,#000 20%,transparent 75%)}
+.noise{position:absolute;inset:0;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+main,footer{position:relative;z-index:1}
+section[id]{scroll-margin-top:96px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:10px;padding:13px 26px;border-radius:100px;font-size:15px;font-weight:600;letter-spacing:.03em;cursor:pointer;border:1px solid transparent;transition:transform .5s var(--ease-spring),box-shadow .5s var(--ease-smooth),background .5s var(--ease-smooth),border-color .5s var(--ease-smooth)}
+.btn svg{width:16px;height:16px}
+.btn-primary{background:var(--text-primary);color:#0a0a0c}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 14px 34px hsla(0,0%,100%,.22)}
+.btn-secondary{background:hsla(0,0%,100%,.08);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:var(--text-primary);border-color:var(--border-subtle)}
+.btn-secondary:hover{transform:translateY(-3px);background:hsla(0,0%,100%,.14);border-color:var(--border-strong)}
+.btn-ghost{background:hsla(158,70%,55%,.1);border-color:hsla(158,70%,55%,.35);color:var(--accent)}
+.btn-ghost:hover{transform:translateY(-3px);background:hsla(158,70%,55%,.18)}
+.btn:active{transform:scale(.97)}
+
+/* hero */
+.hero{padding:190px 32px 130px;position:relative}
+.hero-inner{display:grid;grid-template-columns:1.05fr .95fr;gap:70px;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-secondary);border:1px solid var(--border-subtle);background:hsla(0,0%,100%,.04);border-radius:100px;padding:7px 15px;margin-bottom:26px}
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent-glow)}
+h1{font-family:var(--font-display);font-size:clamp(46px,7.4vw,96px);line-height:1.02;font-weight:700;letter-spacing:-.028em;margin-bottom:30px;text-shadow:0 0 90px hsla(213,100%,65%,.3)}
+h1 .grad{filter:drop-shadow(0 0 36px hsla(158,70%,55%,.4))}
+.hero-sub{color:var(--text-tertiary);font-size:16.5px;line-height:1.95;max-width:620px;letter-spacing:.04em}
+.hero-stat{display:flex;margin-top:34px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:hsla(0,0%,100%,.03);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);overflow:hidden}
+.hero-stat .hs{flex:1;padding:16px 18px;border-right:1px solid var(--border-subtle)}
+.hero-stat .hs:last-child{border-right:none}
+.hero-stat b{display:block;font-family:var(--font-display);font-size:26px;font-weight:700;line-height:1.1;background:linear-gradient(120deg,#fff,#9cc0ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-stat .hs:first-child b{background:linear-gradient(120deg,#fff,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-stat span{display:block;margin-top:5px;font-size:11.5px;color:var(--text-tertiary);letter-spacing:.08em;font-family:var(--font-mono)}
+.hero-ctas{display:flex;gap:14px;margin-top:38px;flex-wrap:wrap}
+.hero-links{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;align-items:center}
+.hero-links a{font-family:var(--font-mono);font-size:12px;letter-spacing:.05em;color:var(--text-tertiary);border-bottom:1px solid var(--border-subtle);padding-bottom:2px;transition:color .4s var(--ease-smooth),border-color .4s var(--ease-smooth)}
+.hero-links a:hover{color:var(--text-primary);border-color:var(--border-strong)}
+
+/* terminal */
+.terminal{position:relative;background:linear-gradient(180deg,rgba(18,20,26,.94),rgba(10,11,14,.96));border:1px solid var(--border-subtle);border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 34px 90px rgba(0,0,0,.55),0 0 0 1px hsla(0,0%,100%,.03) inset}
+.terminal-head{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border-subtle);background:hsla(0,0%,100%,.02)}
+.term-dots{display:flex;gap:7px}
+.term-dots span{width:11px;height:11px;border-radius:50%}
+.term-dots .r{background:#ff5f57}.term-dots .y{background:#febc2e}.term-dots .g{background:#28c840}
+.copy-btn{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-tertiary);background:transparent;border:none;cursor:pointer;letter-spacing:.04em;transition:color .4s var(--ease-smooth)}
+.copy-btn:hover{color:var(--text-primary)}
+.terminal-pre{padding:22px 20px;font-family:var(--font-mono);font-size:12.8px;line-height:2.05;color:var(--text-secondary);overflow-x:auto;white-space:pre;letter-spacing:.01em}
+.terminal-pre .prompt{color:var(--accent);margin-right:8px;user-select:none}
+.terminal-pre .c1{color:#9cc0ff}
+.terminal-pre .c2{color:#d9dbe3}
+.terminal-pre .cmt{color:hsla(0,0%,100%,.38)}
+.cursor{display:inline-block;width:8px;height:15px;background:var(--accent);box-shadow:0 0 12px var(--accent-glow);vertical-align:-3px;margin-left:2px;animation:blink 1.05s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.terminal::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(420px 190px at 85% 0%,hsla(213,100%,65%,.18),transparent 70%)}
+.terminal{box-shadow:0 40px 110px rgba(0,0,0,.6),0 0 70px hsla(213,100%,65%,.12),0 0 0 1px hsla(0,0%,100%,.03) inset}
+
+/* marquee */
+.marquee{border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle);padding:22px 0;overflow:hidden;background:hsla(0,0%,100%,.015);position:relative;z-index:1}
+.marquee-track{display:flex;gap:14px;width:max-content;animation:scrollx 46s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+@keyframes scrollx{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.marquee .mi{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-mono);font-size:12.5px;letter-spacing:.08em;color:var(--text-tertiary);border:1px solid var(--border-subtle);background:hsla(0,0%,100%,.03);border-radius:100px;padding:9px 18px;white-space:nowrap}
+.marquee .mi i{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent-glow);display:inline-block;flex-shrink:0}
+.marquee .mi.b i{background:var(--brand);box-shadow:0 0 10px var(--brand-glow)}
+
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:20px}
+.bento .card{grid-column:span 2}
+.bento .card.mid{grid-column:span 3}
+.bento .card.big{grid-column:span 3;padding:38px}
+.bento .card.big h3{font-size:22px}
+.bento .card.big p{font-size:14.5px}
+.bento .card.hero-card{border-color:hsla(158,70%,55%,.3);background:linear-gradient(160deg,hsla(158,70%,55%,.1),hsla(0,0%,100%,.02) 45%)}
+.bento .card.hero-card .icon{background:linear-gradient(135deg,hsla(158,70%,55%,.24),hsla(158,70%,55%,.05));border-color:hsla(158,70%,55%,.3);color:var(--accent)}
+.bento .card.hero-card .icon.big-ic{width:64px;height:64px;border-radius:20px}
+.bento .card.hero-card .icon.big-ic svg{width:32px;height:32px}
+.bento .card .big-num{font-family:var(--font-display);font-size:46px;font-weight:700;line-height:1;letter-spacing:-.035em;background:linear-gradient(120deg,#fff,#9cc0ff);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px}
+.bento .card.hero-card::before{background:radial-gradient(520px 200px at 50% -10%,hsla(158,70%,55%,.18),transparent 70%)}
+.bento .card.hero-card .big-num{background:linear-gradient(120deg,#fff,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* section head */
+.sec-head{text-align:center;display:flex;flex-direction:column;align-items:center;gap:24px;margin-bottom:88px}
+.pill{display:inline-flex;align-items:center;border-radius:100px;padding:7px 16px;border:1px solid var(--border-subtle);background:hsla(0,0%,100%,.04)}
+.pill span{font-family:var(--font-mono);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-secondary)}
+.sec-head h2{font-family:var(--font-display);font-size:clamp(32px,4.4vw,50px);line-height:1.22;letter-spacing:.01em;font-weight:700}
+.sec-head p{max-width:760px;color:var(--text-tertiary);line-height:1.9;font-size:15.5px;letter-spacing:.04em}
+
+/* philosophy compare */
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:26px;align-items:stretch}
+.vs-card{background:linear-gradient(180deg,hsla(0,0%,100%,.05),hsla(0,0%,100%,.02));border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:34px;display:flex;flex-direction:column;gap:16px}
+.vs-card.win{border-color:hsla(158,70%,55%,.32);box-shadow:0 24px 70px hsla(158,70%,55%,.08)}
+.vs-card .tag{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-tertiary)}
+.vs-card.win .tag{color:var(--accent)}
+.vs-card h3{font-family:var(--font-display);font-size:24px;font-weight:700;letter-spacing:.01em}
+.vs-card p{color:var(--text-tertiary);font-size:14.5px;line-height:1.9;letter-spacing:.03em}
+.vs-card code{font-family:var(--font-mono);font-size:12.5px;color:#9cc0ff;background:hsla(213,100%,65%,.1);border-radius:6px;padding:2px 7px}
+.vs-mid{display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;color:var(--text-tertiary);letter-spacing:.14em}
+
+/* cards grid */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.card{background:linear-gradient(180deg,hsla(0,0%,100%,.06),hsla(0,0%,100%,.02));border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:32px;display:flex;flex-direction:column;gap:13px;position:relative;overflow:hidden;transition:transform .6s var(--ease-spring),border-color .5s var(--ease-smooth)}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(520px 200px at 50% -10%,hsla(213,100%,65%,.14),transparent 70%);opacity:0;transition:opacity .6s var(--ease-smooth)}
+.card:hover{transform:translateY(-8px);border-color:var(--border-strong)}
+.card:hover::before{opacity:1}
+.card .icon{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,hsla(213,100%,65%,.22),hsla(213,100%,65%,.05));border:1px solid hsla(213,100%,65%,.24);color:#9cc0ff;display:flex;align-items:center;justify-content:center}
+.card .icon svg{width:24px;height:24px}
+.card h3{font-size:17.5px;font-weight:600;letter-spacing:.01em}
+.card p{font-size:14px;line-height:1.85;color:var(--text-tertiary);letter-spacing:.03em}
+.card .tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.tool-chip{font-family:var(--font-mono);font-size:11.5px;padding:5px 11px;border-radius:100px;background:hsla(0,0%,100%,.05);border:1px solid var(--border-subtle);color:var(--text-secondary);letter-spacing:.04em}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+.stat{background:hsla(0,0%,100%,.035);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:26px 20px;text-align:center}
+.stat b{display:block;font-family:var(--font-display);font-size:clamp(26px,3.2vw,38px);font-weight:700;letter-spacing:-.01em;background:linear-gradient(100deg,#fff,#9cc0ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{display:block;margin-top:8px;font-size:12.5px;color:var(--text-tertiary);letter-spacing:.06em}
+
+/* code block */
+.code-wrap{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.code-copy{display:flex;flex-direction:column;gap:20px}
+.code-copy h3{font-family:var(--font-display);font-size:clamp(26px,3.1vw,38px);line-height:1.26;font-weight:700}
+.code-copy>p{color:var(--text-tertiary);font-size:15px;line-height:1.95;letter-spacing:.035em}
+.code-list{display:flex;flex-direction:column;gap:12px;margin-top:2px}
+.code-list .item{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:var(--radius-md);border:1px solid transparent;transition:border-color .5s var(--ease-smooth),background .5s var(--ease-smooth)}
+.code-list .item:hover{border-color:var(--border-subtle);background:hsla(0,0%,100%,.03)}
+.code-list .num{width:28px;height:28px;border-radius:9px;background:hsla(158,70%,55%,.12);border:1px solid hsla(158,70%,55%,.3);color:var(--accent);font-family:var(--font-mono);font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.code-list b{font-size:14.5px;font-weight:600;letter-spacing:.01em;display:block}
+.code-list span{font-size:13px;color:var(--text-tertiary);line-height:1.75;display:block;margin-top:3px;letter-spacing:.03em}
+
+/* architecture */
+.arch-wrap{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center}
+.arch-copy{display:flex;flex-direction:column;gap:20px}
+.arch-copy h3{font-family:var(--font-display);font-size:clamp(26px,3.1vw,38px);line-height:1.26;font-weight:700}
+.arch-copy>p{color:var(--text-tertiary);font-size:15px;line-height:1.95;letter-spacing:.035em}
+.arch-diagram{background:linear-gradient(180deg,hsla(0,0%,100%,.05),hsla(0,0%,100%,.02));border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:36px;position:relative}
+.dg-user{text-align:center;font-size:13px;color:var(--text-tertiary);padding-bottom:16px;letter-spacing:.04em}
+.dg-user svg{width:14px;height:14px;display:inline-block;vertical-align:-2px;margin-right:5px}
+.dg-arrow{display:flex;justify-content:center;padding:10px 0 6px;color:var(--brand)}
+.dg-arrow svg{width:18px;height:18px;filter:drop-shadow(0 0 6px hsla(213,100%,65%,.5))}
+.dg-node{background:hsla(0,0%,100%,.07);border:1px solid var(--border-strong);border-radius:16px;padding:15px 20px;text-align:center;font-size:13.5px;font-weight:600;letter-spacing:.01em}
+.dg-node.main{border-color:hsla(213,100%,65%,.5);background:linear-gradient(135deg,hsla(213,100%,65%,.2),hsla(213,100%,65%,.05));color:#d6e6ff;box-shadow:0 0 34px hsla(213,100%,65%,.12)}
+.dg-line{display:flex;align-items:center;justify-content:center;gap:14px;color:var(--text-tertiary);font-size:11.5px;font-family:var(--font-mono);padding:15px 0;letter-spacing:.08em}
+.dg-line .bar{flex:1;height:1px;background:linear-gradient(90deg,transparent,hsla(213,100%,70%,.5),transparent)}
+.dg-line svg{width:14px;height:14px;color:var(--brand);flex-shrink:0}
+.dg-sub{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.dg-sub .sub{background:hsla(0,0%,100%,.04);border:1px solid var(--border-subtle);border-radius:13px;padding:13px 8px;text-align:center;font-family:var(--font-mono);font-size:10.5px;color:var(--text-tertiary);transition:transform .5s var(--ease-spring),border-color .5s var(--ease-smooth);letter-spacing:.03em}
+.dg-sub .sub:hover{transform:translateY(-3px);border-color:var(--border-strong)}
+.dg-sub .sub b{display:block;color:var(--text-primary);font-family:var(--font-body);font-weight:600;font-size:13px;margin-bottom:4px}
+
+/* modes */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.mode-card{background:linear-gradient(180deg,hsla(0,0%,100%,.06),hsla(0,0%,100%,.02));border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:34px;display:flex;flex-direction:column;gap:16px;transition:transform .6s var(--ease-spring),border-color .5s var(--ease-smooth)}
+.mode-card:hover{transform:translateY(-6px);border-color:var(--border-strong)}
+.mode-icon{width:46px;height:46px;border-radius:14px;background:hsla(213,100%,65%,.14);border:1px solid hsla(213,100%,65%,.28);color:var(--brand);display:flex;align-items:center;justify-content:center}
+.mode-icon svg{width:23px;height:23px}
+.mode-card h3{font-size:19px;font-weight:600}
+.mode-card .cmd{font-family:var(--font-mono);font-size:12px;color:var(--accent);background:hsla(158,70%,55%,.08);border:1px solid hsla(158,70%,55%,.22);border-radius:8px;padding:6px 11px;align-self:flex-start;letter-spacing:.03em}
+.mode-card ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+.mode-card li{font-size:13.5px;color:var(--text-tertiary);line-height:1.8;padding-left:19px;position:relative;letter-spacing:.03em}
+.mode-card li::before{content:"";position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:hsla(213,100%,65%,.7)}
+
+/* install */
+.install-wrap{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center}
+.install-copy{display:flex;flex-direction:column;gap:20px}
+.install-copy h3{font-family:var(--font-display);font-size:clamp(26px,3.1vw,38px);line-height:1.26;font-weight:700}
+.install-copy>p{color:var(--text-tertiary);font-size:15px;line-height:1.95;letter-spacing:.035em}
+.cmd-grid{display:flex;flex-direction:column;gap:11px;margin-top:2px}
+.cmd-row{display:flex;align-items:center;gap:16px;background:hsla(0,0%,100%,.03);border:1px solid var(--border-subtle);border-radius:15px;padding:14px 18px;transition:border-color .5s var(--ease-smooth),background .5s var(--ease-smooth),transform .6s var(--ease-spring)}
+.cmd-row:hover{border-color:var(--border-strong);background:hsla(0,0%,100%,.05);transform:translateX(4px)}
+.cmd-row .k{font-family:var(--font-mono);font-size:12px;color:var(--accent);width:92px;flex-shrink:0;letter-spacing:.05em}
+.cmd-row .v{font-family:var(--font-mono);font-size:12.5px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.02em}
+
+/* config table */
+.table-wrap{overflow-x:auto;border:1px solid var(--border-subtle);border-radius:var(--radius-lg);background:hsla(0,0%,100%,.02)}
+table{width:100%;border-collapse:collapse;min-width:620px}
+th,td{text-align:left;padding:14px 20px;font-size:13.5px;border-bottom:1px solid var(--border-subtle);letter-spacing:.03em}
+th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary);font-weight:500;background:hsla(0,0%,100%,.03)}
+td:first-child{font-family:var(--font-mono);font-size:12.5px;color:#9cc0ff;white-space:nowrap}
+td{color:var(--text-tertiary)}
+tr:last-child td{border-bottom:none}
+
+/* cross link banner */
+.cross{background:linear-gradient(135deg,hsla(213,100%,65%,.14),hsla(158,70%,55%,.08));border:1px solid var(--border-subtle);border-radius:var(--radius-xl);padding:46px;display:flex;align-items:center;justify-content:space-between;gap:34px;flex-wrap:wrap}
+.cross h3{font-family:var(--font-display);font-size:clamp(22px,2.6vw,30px);font-weight:700;line-height:1.3;margin-bottom:10px}
+.cross p{color:var(--text-tertiary);font-size:14.5px;line-height:1.9;max-width:620px;letter-spacing:.035em}
+.cross-actions{display:flex;gap:12px;flex-wrap:wrap}
+
+/* footer */
+footer{border-top:1px solid var(--border-subtle);padding:76px 0 44px;margin-top:20px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.3))}
+.footer-inner{display:flex;flex-direction:column;gap:36px}
+.footer-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:36px}
+.footer-brand{display:flex;flex-direction:column;gap:14px}
+.footer-brand .row{display:flex;align-items:center;gap:11px}
+.footer-brand svg{width:27px;height:27px}
+.footer-brand .name{font-family:var(--font-display);font-weight:700;font-size:19px}
+.footer-brand p{font-size:13px;color:var(--text-tertiary);max-width:420px;line-height:1.9;letter-spacing:.03em}
+.footer-cols{display:flex;gap:60px}
+.footer-cols .col{display:flex;flex-direction:column;gap:12px}
+.footer-cols .col b{font-size:13px;font-weight:600;letter-spacing:.05em}
+.footer-cols .col a{font-size:13px;color:var(--text-tertiary);transition:color .4s var(--ease-smooth);letter-spacing:.03em}
+.footer-cols .col a:hover{color:var(--text-primary)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;padding-top:28px;border-top:1px solid var(--border-subtle);font-size:12.5px;color:var(--text-tertiary);letter-spacing:.03em}
+.badge-mini{font-family:var(--font-mono);font-size:11.5px;padding:5px 12px;border-radius:100px;border:1px solid var(--border-subtle);background:hsla(0,0%,100%,.04);color:var(--text-secondary);letter-spacing:.05em}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(36px);filter:blur(6px);transition:opacity 1.1s var(--ease-out),transform 1.1s var(--ease-out),filter 1.1s var(--ease-out)}
+.reveal.in{opacity:1;transform:none;filter:blur(0)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+.rise{animation:rise 1.1s var(--ease-out) both}
+.rise-1{animation-delay:.05s}.rise-2{animation-delay:.16s}.rise-3{animation-delay:.27s}.rise-4{animation-delay:.38s}.rise-5{animation-delay:.5s}
+@keyframes rise{from{opacity:0;transform:translateY(30px);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .rise,.reveal{opacity:1;transform:none;filter:none}
+}
+@media (max-width:1024px){
+  .hero-inner,.code-wrap,.arch-wrap,.install-wrap{grid-template-columns:1fr;gap:52px}
+  .bento .card,.bento .card.big,.bento .card.mid{grid-column:span 3}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .vs{grid-template-columns:1fr}
+  .vs-mid{padding:6px 0}
+  .ds-nav .hide-m{display:none}
+}
+@media (max-width:640px){
+  section.container{padding:130px 24px}
+  .hero{padding:150px 24px 100px}
+  .bento .card,.bento .card.big,.bento .card.mid{grid-column:span 6}
+  .modes,.stats{grid-template-columns:1fr}
+  .hero-stat{flex-wrap:wrap}
+  .hero-stat .hs{flex:1 1 40%;border-right:none;border-bottom:1px solid var(--border-subtle)}
+  .cross{padding:32px}
+  .footer-cols{gap:36px;flex-wrap:wrap}
+  .container{padding:0 24px}
+}
+</style>
+</head>
+<body>
+<div class="bg-scene">
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+  <div class="glow g3"></div>
+  <div class="grid"></div>
+  <div class="noise"></div>
+</div>
+
+<header class="ds-header" id="header">
+  <div class="ds-header-bar">
+    <a class="ds-logo" href="#top">
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pc-b" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#3776AB"/><stop offset="100%" stop-color="#2B5B8A"/></linearGradient><linearGradient id="pc-y" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FFD43B"/><stop offset="100%" stop-color="#E5BE2D"/></linearGradient></defs><path d="M60 10 C30 10 15 35 15 55 C15 75 30 95 45 100 L45 110 L55 110 L55 100 L60 102 L60 10 Z" fill="url(#pc-b)"/><path d="M60 10 C90 10 105 35 105 55 C105 75 90 95 75 100 L75 110 L65 110 L65 100 L60 102 L60 10 Z" fill="url(#pc-y)"/><path d="M20 45 C5 40 0 50 5 60 C10 70 20 65 25 55 C28 48 25 45 20 45Z" fill="url(#pc-b)"/><path d="M100 45 C115 40 120 50 115 60 C110 70 100 65 95 55 C92 48 95 45 100 45Z" fill="url(#pc-y)"/><circle cx="45" cy="35" r="6" fill="#0d1117"/><circle cx="75" cy="35" r="6" fill="#0d1117"/><circle cx="43" cy="33" r="3" fill="#73d2ff"/><circle cx="73" cy="33" r="3" fill="#73d2ff"/><path d="M45 15 Q35 5 30 8" stroke="#3776AB" stroke-width="3" stroke-linecap="round"/><path d="M75 15 Q85 5 90 8" stroke="#FFD43B" stroke-width="3" stroke-linecap="round"/></svg>
+      PyClaw <span class="lite-tag">Lite</span>
+    </a>
+    <nav class="ds-nav">
+      <a class="hide-m" href="#philosophy">哲学</a>
+      <a class="hide-m" href="#skill">自进化</a>
+      <a class="hide-m" href="#power">能力</a>
+      <a class="hide-m" href="#arch">架构</a>
+      <a class="hide-m" href="#install">安装</a>
+      <a class="nav-home" href="../index.html">← PyClaw 主站</a>
+      <a href="https://github.com/LK-BLOG/pyclaw-lite" target="_blank" rel="noopener noreferrer" class="nav-cta">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <div class="hero-badge rise rise-1"><span class="dot"></span>v0.0.1-beta.2 · Independent Project</div>
+      <h1 class="rise rise-2">一把 <span class="grad">exec</span>,<br/>走遍天下。</h1>
+      <p class="hero-sub rise rise-3">PyClaw Lite 是 PyClaw 的轻量分支:2854 行 Python、12 个模块、只有一个内置工具、一个依赖。没有插件生态要维护,没有工具链要学习——想读文件? <code style="font-family:var(--font-mono);font-size:13.5px;color:#9cc0ff">cat</code>。想装包? <code style="font-family:var(--font-mono);font-size:13.5px;color:#9cc0ff">pip</code>。AI 自己动手,什么都能切。</p>
+      <div class="hero-stat rise rise-5">
+        <div class="hs"><b>2854</b><span>行 PYTHON</span></div>
+        <div class="hs"><b>1</b><span>个工具</span></div>
+        <div class="hs"><b>1</b><span>个依赖</span></div>
+        <div class="hs"><b>12</b><span>钩子事件</span></div>
+      </div>
+      <div class="hero-ctas rise rise-4">
+        <a class="btn btn-primary" href="https://github.com/LK-BLOG/pyclaw-lite" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          查看 GitHub
+        </a>
+        <a class="btn btn-ghost" href="#install">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3.25C6.75 2.25 4.8 1.95 2.25 2.25V12.75C4.8 12.45 6.75 12.75 8 13.75C9.25 12.75 11.2 12.45 13.75 12.75V2.25C11.2 1.95 9.25 2.25 8 3.25Z"/><path d="M8 3.25V13.75"/></svg>
+          快速开始
+        </a>
+      </div>
+      <div class="hero-links rise rise-5">
+        <a href="../index.html">← 完整版 PyClaw 官网</a>
+        <span style="color:var(--text-tertiary);opacity:.5">·</span>
+        <a href="#power">能力清单</a>
+        <span style="color:var(--text-tertiary);opacity:.5">·</span>
+        <a href="#config">配置</a>
+      </div>
+    </div>
+
+    <div class="terminal rise rise-5">
+      <div class="terminal-head">
+        <div class="term-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <button class="copy-btn" id="copyBtn">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-1a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h1"/></svg>
+          复制
+        </button>
+      </div>
+      <pre class="terminal-pre" id="termPre"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track" id="mqTrack"></div>
+</div>
+
+<!-- ============ PHILOSOPHY ============ -->
+<section class="container" id="philosophy">
+  <div class="sec-head reveal">
+    <div class="pill"><span>One Tool, Zero Tools Chain</span></div>
+    <h2>别人给你一整套餐具,<span class="hl">我们只给一把刀</span></h2>
+    <p>市面上的 Agent 框架都预置好文件读写、网络搜索、代码执行、数据库工具……看着很全,真遇到活还得自己再造。PyClaw Lite 反过来:只有一个 <b style="color:var(--text-primary)">exec</b>,剩下的让 AI 自己动手。</p>
+  </div>
+  <div class="vs">
+    <div class="vs-card reveal d1">
+      <span class="tag">Typical Framework</span>
+      <h3>很多餐具</h3>
+      <p>file_read / file_write / web_search / db_query / browser…… 工具装了一柜子,遇到新菜还是得自己造,还得先学一遍怎么用。代码越堆越厚,能力却没长多少。</p>
+      <div class="tools" style="display:flex;gap:8px;flex-wrap:wrap"><span class="tool-chip">file</span><span class="tool-chip">search</span><span class="tool-chip">browser</span><span class="tool-chip">db</span><span class="tool-chip">+N</span></div>
+    </div>
+    <div class="vs-mid reveal d2">VS</div>
+    <div class="vs-card win reveal d3">
+      <span class="tag">PyClaw Lite</span>
+      <h3>一把刀</h3>
+      <p>只有一个 <code>exec</code>。读文件 <code>cat</code>,装包 <code>pip</code>,爬网页 <code>curl</code>,分析数据写个脚本 <code>python</code> 跑。系统提示词就一句话:<b style="color:var(--text-primary)">别猜,读文件、看输出、再动手</b>。</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tool-chip" style="color:var(--accent);border-color:hsla(158,70%,55%,.3)">exec</span><span class="tool-chip">2854 LOC</span><span class="tool-chip">1 dep</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SELF-EVOLVING SKILLS ============ -->
+<section class="container" id="skill">
+  <div class="code-wrap">
+    <div class="code-copy reveal">
+      <div class="pill" style="align-self:flex-start"><span>Self-Evolving</span></div>
+      <h3>能力长在 <span class="hl">skills/</span> 里,<br/>不长在代码里</h3>
+      <p>AI 可以把复杂或可复用的逻辑丢进 <code style="font-family:var(--font-mono);font-size:13px;color:#9cc0ff">skills/</code>。下次启动,目录里的每个 <code style="font-family:var(--font-mono);font-size:13px;color:#9cc0ff">SKILL.md</code> 或 <code style="font-family:var(--font-mono);font-size:13px;color:#9cc0ff">.py</code> 都会自动列进系统提示词——AI 立刻知道自己会什么。</p>
+      <div class="code-list">
+        <div class="item"><div class="num">01</div><div><b>代码量不涨,能力在涨</b><span>新增技能是写一个文件,不是改一处框架。</span></div></div>
+        <div class="item"><div class="num">02</div><div><b>SKILL.md 自带 frontmatter</b><span>name / version / description / requires,启动时自动索引。</span></div></div>
+        <div class="item"><div class="num">03</div><div><b>插件同源</b><span>.pyclaw-plugin / .codex-plugin / .claude-plugin 都能识别,贡献工具、钩子、MCP 服务器。</span></div></div>
+      </div>
+    </div>
+    <div class="terminal reveal d2">
+      <div class="terminal-head">
+        <div class="term-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <button class="copy-btn" id="copyBtnSkill">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-1a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h1"/></svg>
+          复制
+        </button>
+      </div>
+      <pre class="terminal-pre" id="termSkill"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CAPABILITIES ============ -->
+<section class="container" id="power">
+  <div class="sec-head reveal">
+    <div class="pill"><span>Light ≠ Weak</span></div>
+    <h2>轻的是体积,<span class="hl">不是能力</span></h2>
+    <p>砍掉的是多余的层,留下的全是硬东西:权限分级、上下文压缩、会话落盘、MCP、钩子引擎、供应商表、子 Agent。</p>
+  </div>
+  <div class="bento">
+    <div class="card big hero-card reveal d1">
+      <div class="icon big-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-5 3 10 2.5-5H21"/></svg></div>
+      <h3>只有一个工具,却什么都能干</h3>
+      <p>流式吐字、思考可见、失败自动重试。exec 背后是整台机器:它能读、能写、能装包、能爬网页——你不需要为每个动作准备一个专用工具。</p>
+      <div class="tools"><span class="tool-chip">exec</span><span class="tool-chip">stream</span><span class="tool-chip">retry ×2</span></div>
+    </div>
+    <div class="card big reveal d2">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.4 7.7 8 9 4.6-1.3 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></div>
+      <h3>权限三级 + 命令分段</h3>
+      <p>request / auto / full 三档。命令按 <code>|</code> <code>&amp;&amp;</code> <code>;</code> <code>$()</code> 切段,<code>ls &amp;&amp; rm -rf /</code> 藏不住;危险命令直接一票否决,黑名单内置不可绕过。</p>
+      <div class="tools"><span class="tool-chip">request</span><span class="tool-chip">auto</span><span class="tool-chip">full</span></div>
+    </div>
+    <div class="card mid reveal d3">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h13"/></svg></div>
+      <h3>上下文压缩</h3>
+      <p>token 实时计量,超阈值自动摘要;工具输出超限自动落盘,长会话不断片、不爆窗口。</p>
+      <div class="tools"><span class="tool-chip">compact</span><span class="tool-chip">spill</span></div>
+    </div>
+    <div class="card mid reveal d1">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="8" ry="2.8"/><path d="M4 5.5V17c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8V5.5M4 11.2c0 1.5 3.6 2.8 8 2.8s8-1.3 8-2.8"/></svg></div>
+      <h3>会话落盘</h3>
+      <p>追加式事件日志 + 索引,<code>--continue</code> 续上次,<code>--session</code> 精确回到某一次。</p>
+    </div>
+    <div class="card reveal d2">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg></div>
+      <h3>MCP 客户端</h3>
+      <p>stdio 与 HTTP 双通道,外部工具统一暴露成 <code>mcp__&lt;server&gt;__&lt;tool&gt;</code>。</p>
+      <div class="tools"><span class="tool-chip">stdio</span><span class="tool-chip">http</span></div>
+    </div>
+    <div class="card reveal d3">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 5 8l4 4M15 12l4 4-4 4"/><path d="M5 8h9M19 16h-9"/></svg></div>
+      <h3>钩子引擎</h3>
+      <p>12 个事件、4 种处理器,Codex 与 Claude 的 JSON 协议都兼容。</p>
+    </div>
+    <div class="card reveal d1">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div>
+      <h3>20+ 供应商</h3>
+      <p>DeepSeek、豆包、Kimi、Qwen、GLM、MiniMax、Gemini、xAI、Groq……一套 OpenAI 兼容协议全通吃。</p>
+    </div>
+    <div class="card reveal d2">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="15" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></svg></div>
+      <h3>Codex 风 TUI</h3>
+      <p>思考卡片、工具调用卡片、状态行;思考强度是 Claude Code 风 <code>/effort</code> 滑杆,←/→ 调档。</p>
+    </div>
+    <div class="card reveal d3">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20.5c0-3.4 3.2-5.3 7-5.3s7 1.9 7 5.3"/></svg></div>
+      <h3>子 Agent 分工</h3>
+      <p>SUB_AGENTS 配置角色,主 Agent 拆活派出去,执行与文件读写互不越权。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ARCHITECTURE ============ -->
+<section class="container" id="arch">
+  <div class="arch-wrap">
+    <div class="arch-copy reveal">
+      <div class="pill" style="align-self:flex-start"><span>How It Works</span></div>
+      <h3>一个循环,<span class="hl">六个子系统</span></h3>
+      <p>主循环只做三件事:把上下文喂给模型、把模型吐出的 <code style="font-family:var(--font-mono);font-size:13px;color:#9cc0ff">exec</code> 调用跑掉、把结果塞回去。其余全是配角,各管一摊。</p>
+      <div class="code-list">
+        <div class="item"><div class="num">01</div><div><b>供应商层</b><span>目录 / 模型窗口表 / 唯一的流式调用,重试逻辑只有一处。</span></div></div>
+        <div class="item"><div class="num">02</div><div><b>权限层</b><span>命令分段、前缀规则、拒绝名单,危险动作过不去。</span></div></div>
+        <div class="item"><div class="num">03</div><div><b>上下文层</b><span>执行外壳探测(WSL &gt; Git Bash &gt; PowerShell &gt; CMD)、计量、落盘。</span></div></div>
+      </div>
+    </div>
+    <div class="arch-diagram reveal d2">
+      <div class="dg-user"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5c0-3.6 3.4-5.5 7.5-5.5s7.5 1.9 7.5 5.5"/></svg> 用户</div>
+      <div class="dg-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v16M5 12l7 7 7-7"/></svg></div>
+      <div class="dg-node main">Agent 主循环 · LLM 大脑 + 唯一工具 exec</div>
+      <div class="dg-line"><span class="bar"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v14M6 12l6 6 6-6"/></svg><span>call</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v14M6 12l6 6 6-6"/></svg><span class="bar"></span></div>
+      <div class="dg-sub">
+        <div class="sub"><b>providers</b>供应商 · 窗口表</div>
+        <div class="sub"><b>permissions</b>分段 · 拒绝</div>
+        <div class="sub"><b>context</b>计量 · 落盘</div>
+        <div class="sub"><b>sessions</b>事件日志</div>
+        <div class="sub"><b>plugins</b>技能 · 工具</div>
+        <div class="sub"><b>hooks</b>12 事件</div>
+      </div>
+      <div class="dg-line" style="padding:14px 0 2px"><span class="bar"></span><span>+ mcp.py · cli.py · tui.py · config.py</span><span class="bar"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODES ============ -->
+<section class="container" id="modes">
+  <div class="sec-head reveal">
+    <div class="pill"><span>Two Faces, One Agent</span></div>
+    <h2>要花哨有 TUI,<span class="hl">要干净有管道</span></h2>
+    <p>同一个 Agent、同一份会话、同一套配置,进哪个门随你。早期那个 WebUI 已经砍了——多一层服务端,不如少一层。</p>
+  </div>
+  <div class="modes">
+    <div class="mode-card reveal d1">
+      <div class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="15" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></svg></div>
+      <h3>交互式 TUI</h3>
+      <span class="cmd">python main.py</span>
+      <ul>
+        <li>面板化界面:logo、信息表、状态行、思考与工具调用卡片</li>
+        <li>思考强度滑杆,←/→ 调档,Enter 确认,Esc 取消</li>
+        <li>退出敲 exit / quit,或者直接 Ctrl+C</li>
+      </ul>
+    </div>
+    <div class="mode-card reveal d2">
+      <div class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="m6 9 2.5 2.5L6 14M11 15h5"/></svg></div>
+      <h3>朴素 CLI</h3>
+      <span class="cmd">python main.py --plain</span>
+      <ul>
+        <li>逐行对话,零界面负担,适合脚本、终端复用与管道</li>
+        <li>y/N 审批闸门,危险命令当场拦下</li>
+        <li>--continue 续上次 · --session 指定会话 · --model 临时换模型</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONFIG ============ -->
+<section class="container" id="config">
+  <div class="sec-head reveal">
+    <div class="pill"><span>Schema-Driven Config</span></div>
+    <h2>一份 <span class="hl">pyclaw.json</span>,说清全部行为</h2>
+    <p>配置由 schema 驱动:校验、i18n、插件自定义设置都从同一张表长出来。改完存盘即生效,不用重启去猜。</p>
+  </div>
+  <div class="table-wrap reveal d1">
+    <table>
+      <thead><tr><th>字段</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td>PROVIDER / ENDPOINT</td><td>供应商预设;选 custom 就只用你填的 base URL</td></tr>
+        <tr><td>API_KEY</td><td>只落在本机 pyclaw.json,不上传任何地方</td></tr>
+        <tr><td>MODEL</td><td>原样发给接口;模型窗口表按名字自动推断上下文</td></tr>
+        <tr><td>APPROVAL_MODE</td><td>request / auto / full —— 危险操作如何批准</td></tr>
+        <tr><td>SHELL</td><td>auto = WSL &gt; Git Bash &gt; PowerShell &gt; CMD</td></tr>
+        <tr><td>REASONING_EFFORT</td><td>默认思考强度,单次会话可覆盖</td></tr>
+        <tr><td>CONTEXT_WINDOW</td><td>0 = 按模型表自动推断</td></tr>
+        <tr><td>COMPACT_*</td><td>压缩阈值 / 逐字保留比例 / 摘要上限</td></tr>
+        <tr><td>TOOL_OUTPUT_MAX_*</td><td>输出行数与字节上限,超出部分自动落盘</td></tr>
+        <tr><td>PLUGINS_ENABLED</td><td>仓库 plugins/ 里的插件在这里逐个开</td></tr>
+        <tr><td>MCP_SERVERS</td><td>stdio 或 HTTP 的 MCP 服务清单</td></tr>
+        <tr><td>HOOKS</td><td>事件到命令的映射,12 个事件随你挂</td></tr>
+        <tr><td>ALLOW_RULES</td><td>命令前缀规则,少弹几次确认</td></tr>
+        <tr><td>BLOCKED_EXTRA</td><td>追加黑名单,额外直接拒绝的命令片段</td></tr>
+        <tr><td>SUB_AGENTS</td><td>子 Agent 角色定义,配合 SUB_AGENTS_ENABLED</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ INSTALL ============ -->
+<section class="container" id="install">
+  <div class="install-wrap">
+    <div class="install-copy reveal">
+      <div class="pill" style="align-self:flex-start"><span>Get Started</span></div>
+      <h3>四条命令,<span class="hl">从零到跑</span></h3>
+      <p>只需要 Python 3.10+ 和 <code style="font-family:var(--font-mono);font-size:13px;color:#9cc0ff">pip install openai</code>。install.sh 会顺手建好 history / memory / plugins 目录,可以反复跑。</p>
+      <div class="cmd-grid">
+        <div class="cmd-row"><span class="k">install</span><span class="v">./install.sh — 装依赖、建目录</span></div>
+        <div class="cmd-row"><span class="k">config</span><span class="v">cp pyclaw.json.example pyclaw.json — 填 KEY</span></div>
+        <div class="cmd-row"><span class="k">run</span><span class="v">python main.py — 进 TUI</span></div>
+        <div class="cmd-row"><span class="k">plain</span><span class="v">python main.py --plain — 极简 CLI</span></div>
+        <div class="cmd-row"><span class="k">resume</span><span class="v">python main.py --continue — 续上次会话</span></div>
+        <div class="cmd-row"><span class="k">tests</span><span class="v">pytest — 9 组测试全部通过</span></div>
+      </div>
+    </div>
+    <div class="terminal reveal d2">
+      <div class="terminal-head">
+        <div class="term-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <button class="copy-btn" id="copyBtn2">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-1a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h1"/></svg>
+          复制
+        </button>
+      </div>
+      <pre class="terminal-pre" id="termInstall"></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CROSS LINK ============ -->
+<section class="container" id="pyclaw" style="padding-top:0">
+  <div class="cross reveal">
+    <div>
+      <h3>需要全套家伙什?<br/>去看完整版 PyClaw。</h3>
+      <p>八个预装插件、36+ 内置工具、桌面 / Web / CLI 三种形态、SQLite 长期记忆——Lite 的每一分克制,完整版都有对应的放纵。</p>
+    </div>
+    <div class="cross-actions">
+      <a class="btn btn-primary" href="../index.html">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        前往 PyClaw 主站
+      </a>
+      <a class="btn btn-secondary" href="https://github.com/LK-BLOG/PyClaw" target="_blank" rel="noopener noreferrer">完整版 GitHub</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="row">
+          <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pc-bf" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#3776AB"/><stop offset="100%" stop-color="#2B5B8A"/></linearGradient><linearGradient id="pc-yf" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FFD43B"/><stop offset="100%" stop-color="#E5BE2D"/></linearGradient></defs><path d="M60 10 C30 10 15 35 15 55 C15 75 30 95 45 100 L45 110 L55 110 L55 100 L60 102 L60 10 Z" fill="url(#pc-bf)"/><path d="M60 10 C90 10 105 35 105 55 C105 75 90 95 75 100 L75 110 L65 110 L65 100 L60 102 L60 10 Z" fill="url(#pc-yf)"/><path d="M20 45 C5 40 0 50 5 60 C10 70 20 65 25 55 C28 48 25 45 20 45Z" fill="url(#pc-bf)"/><path d="M100 45 C115 40 120 50 115 60 C110 70 100 65 95 55 C92 48 95 45 100 45Z" fill="url(#pc-yf)"/><circle cx="45" cy="35" r="6" fill="#0d1117"/><circle cx="75" cy="35" r="6" fill="#0d1117"/><circle cx="43" cy="33" r="3" fill="#73d2ff"/><circle cx="73" cy="33" r="3" fill="#73d2ff"/><path d="M45 15 Q35 5 30 8" stroke="#3776AB" stroke-width="3" stroke-linecap="round"/><path d="M75 15 Q85 5 90 8" stroke="#FFD43B" stroke-width="3" stroke-linecap="round"/></svg>
+          <span class="name">PyClaw Lite</span>
+          <span class="badge-mini">v0.0.1-beta.2</span>
+        </div>
+        <p>PyClaw 的轻量分支 · 一把 exec 走天下 · 独立仓库,独立节奏。单文件静态站,零构建。</p>
+      </div>
+      <div class="footer-cols">
+        <div class="col">
+          <b>本站</b>
+          <a href="#philosophy">设计哲学</a>
+          <a href="#skill">自进化 Skill</a>
+          <a href="#power">能力清单</a>
+          <a href="#install">安装</a>
+        </div>
+        <div class="col">
+          <b>资源</b>
+          <a href="../index.html">PyClaw 主站</a>
+          <a href="https://github.com/LK-BLOG/pyclaw-lite" target="_blank" rel="noopener noreferrer">Lite · GitHub</a>
+          <a href="https://github.com/LK-BLOG/PyClaw" target="_blank" rel="noopener noreferrer">PyClaw · GitHub</a>
+        </div>
+        <div class="col">
+          <b>联系与反馈</b>
+          <a href="mailto:gunmu1145@gmail.com">gunmu1145@gmail.com</a>
+          <a href="https://github.com/LK-BLOG/pyclaw-lite/issues" target="_blank" rel="noopener noreferrer">Issues · 提问题</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>开源 · <b style="color:var(--text-primary)">GPL v3.0</b> · Python 3.10+ · 2854 行 · 1 个依赖</span>
+      <span>© 2026 Campus &amp; His OpenClaw · 数据留在本地</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// header 毛玻璃
+const header=document.getElementById('header');
+addEventListener('scroll',()=>{header.classList.toggle('scrolled',scrollY>24)},{passive:true});
+
+// 终端内容
+const terms={
+  termPre:[
+    ['$',' git clone https://github.com/LK-BLOG/pyclaw-lite','c1'],
+    ['$',' cd pyclaw-lite && ./install.sh','c2'],
+    ['$',' cp pyclaw.json.example pyclaw.json   # 填 API KEY','c2'],
+    ['$',' python main.py','c1'],
+    ['#',' 一个工具:exec · 2854 行 Python · 想干啥自己动手','cmt']
+  ],
+  termSkill:[
+    ['$',' mkdir -p skills/feishu && $EDITOR skills/feishu/SKILL.md','c2'],
+    ['','---','cmt'],
+    ['','name: feishu','c1'],
+    ['','description: "飞书即时通讯:通过 exec + httpx 发消息"','c1'],
+    ['','metadata: { requires: { bins: ["python3"] } }','c1'],
+    ['','---','cmt'],
+    ['#',' 下次启动,feishu 自动出现在系统提示词的 Skills 列表里','cmt']
+  ],
+  termInstall:[
+    ['$',' git clone https://github.com/LK-BLOG/pyclaw-lite','c1'],
+    ['$',' cd pyclaw-lite && ./install.sh','c2'],
+    ['$',' cp pyclaw.json.example pyclaw.json   # 填 API KEY','c2'],
+    ['$',' python main.py','c1'],
+    ['#',' --plain 极简 CLI · --continue 续上次 · --session 指定会话','cmt']
+  ]
+};
+function renderTerm(id){
+  const el=document.getElementById(id);
+  el.innerHTML=terms[id].map(([p,t,cls])=>{
+    const esc=t.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    const pr=p?'<span class="prompt">'+p+'</span>':'';
+    return '<span>'+pr+'<span class="'+cls+'">'+esc+'</span></span>';
+  }).join('\n');
+}
+Object.keys(terms).filter(k=>k!=='termPre').forEach(renderTerm);
+
+// 主终端:逐行打字机
+(function(){
+  const el=document.getElementById('termPre');
+  const lines=terms.termPre.slice();
+  let i=0;
+  function next(){
+    if(i>=lines.length){ el.innerHTML+='<span class="cursor"></span>'; return; }
+    const [p,t,cls]=lines[i++];
+    const esc=t.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    const pr=p?'<span class="prompt">'+p+'</span>':'';
+    const cur=el.innerHTML.replace(/<span class="cursor"><\/span>$/,'');
+    el.innerHTML=cur+'<span>'+pr+'<span class="'+cls+'">'+esc+'</span></span>\n<span class="cursor"></span>';
+    setTimeout(next, cls==='cmt'?520:340);
+  }
+  setTimeout(()=>{el.innerHTML='';next();},320);
+})();
+
+// 跑马灯:能力标签无限滚动
+(function(){
+  const items=['一个工具:exec','2854 行 Python','12 个模块','1 个依赖:openai','20+ 供应商','12 个钩子事件','MCP stdio / HTTP','上下文自动压缩','命令分段防绕过','会话追加式落盘','Codex 风 TUI','SKILL.md 自进化','Python 3.10+','GPL v3.0','数据留在本地'];
+  const track=document.getElementById('mqTrack');
+  const html=items.map((t,i)=>'<span class="mi'+(i%2?' b':'')+'"><i></i>'+t+'</span>').join('');
+  track.innerHTML=html+html;
+})();
+
+// 复制(带降级)
+function copyText(txt,btn){
+  const done=()=>{const old=btn.textContent;btn.textContent='已复制 ✓';setTimeout(()=>btn.textContent=old,1600)};
+  const fb=()=>{
+    const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');done()}catch(e){}
+    ta.remove();
+  };
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(done).catch(fb)}else{fb()}
+}
+const plain={
+  termPre:'git clone https://github.com/LK-BLOG/pyclaw-lite\ncd pyclaw-lite && ./install.sh\ncp pyclaw.json.example pyclaw.json\npython main.py',
+  termSkill:'mkdir -p skills/feishu\n# 写 skills/feishu/SKILL.md,带 frontmatter(name/description/requires)即可',
+  termInstall:'git clone https://github.com/LK-BLOG/pyclaw-lite\ncd pyclaw-lite && ./install.sh\ncp pyclaw.json.example pyclaw.json\npython main.py'
+};
+document.getElementById('copyBtn').addEventListener('click',e=>copyText(plain.termPre,e.currentTarget));
+document.getElementById('copyBtnSkill').addEventListener('click',e=>copyText(plain.termSkill,e.currentTarget));
+document.getElementById('copyBtn2').addEventListener('click',e=>copyText(plain.termInstall,e.currentTarget));
+
+// 滚动入场
+function revealVisible(){document.querySelectorAll('.reveal').forEach(el=>{const r=el.getBoundingClientRect();if(r.top<innerHeight&&r.bottom>0)el.classList.add('in')})}
+window.addEventListener('load',()=>setTimeout(revealVisible,150));
+const io=new IntersectionObserver(es=>{
+  es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target)}});
+},{threshold:.12,rootMargin:'0px 0px -60px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

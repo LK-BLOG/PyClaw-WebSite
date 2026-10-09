@@ -76,6 +76,7 @@ footer{position:relative;z-index:1}
 
 
 .hero-copy{display:flex;flex-direction:column;gap:28px}
+section[id]{scroll-margin-top:96px}
 .hero-badge{display:inline-flex;align-items:center;gap:10px;width:fit-content;padding:8px 16px;border-radius:100px;border:1px solid var(--border-subtle);background:hsla(0,0%,100%,.05);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);font-family:var(--font-mono);font-size:12px;letter-spacing:.05em;color:var(--text-secondary)}
 .hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--brand);box-shadow:0 0 12px var(--brand-glow)}
 .hero h1{font-family:var(--font-display);font-size:clamp(46px,6.4vw,78px);line-height:1.14;letter-spacing:.01em;font-weight:700}
@@ -276,7 +277,7 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
     <nav class="ds-nav">
       <a class="hide-m" href="#modes">三种模式</a>
       <a class="hide-m" href="#plugins">插件生态</a>
-      <a class="hide-m" href="#lite">PyClaw Lite</a>
+      <a class="hide-m" href="lite/index.html">PyClaw Lite</a>
       <a class="hide-m" href="#arch">架构</a>
       <a href="#install" class="nav-cta">开始使用</a>
     </nav>
@@ -424,17 +425,22 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
   <div class="lite-wrap">
     <div class="lite-copy reveal">
       <div class="pill"><span>PyClaw Lite · Independent Project</span></div>
-      <h3>想要更轻? 试试 <span class="hl">PyClaw Lite</span></h3>
-      <p>PyClaw Lite 是 PyClaw 的轻量分支,独立仓库、一把 <b style="color:var(--text-primary)">exec</b> 走天下。零插件依赖,纯 Python,给只想快速跑起来的你。</p>
+      <h3>想要更轻,但更强? 试试 <span class="hl">PyClaw Lite</span></h3>
+      <p>PyClaw Lite 是 PyClaw 的轻量分支,独立仓库、独立节奏,一把 <b style="color:var(--text-primary)">exec</b> 走天下。2854 行 Python、12 个模块、只有一个内置工具——但权限分级、上下文压缩、会话落盘、MCP、12 个钩子事件,一个都没少。</p>
       <div class="lite-feats">
-        <div class="item"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div><div><b>只有一个工具:exec</b><span>想读文件? cat。想装包? pip。想爬网页? curl。AI 自己动手,什么都能干。</span></div></div>
-        <div class="item"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg></div><div><b>依赖极简</b><span>只需一个 openai 包,装完即跑;最新版要求 Python 3.10+,早期版本 3.9 也能跑。</span></div></div>
-        <div class="item"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 22h8M12 18v4"/></svg></div><div><b>CLI + Web 双模式</b><span>python main.py 进命令行,python webui.py 起网页(默认 8765 端口)。</span></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div><div><b>只有一个工具:exec</b><span>想读文件? cat。想装包? pip。想爬网页? curl。AI 自己动手,什么都能切;能力写在 skills/ 里,不写在框架里。</span></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg></div><div><b>依赖极简</b><span>只需一个 openai 包,装完即跑;要求 Python 3.10+。20+ 供应商走同一套 OpenAI 兼容协议。</span></div></div>
+        <div class="item"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 22h8M12 18v4"/></svg></div><div><b>TUI + 朴素 CLI 双模式</b><span>python main.py 进 Codex 风 TUI(含 /effort 思考强度滑杆),--plain 走逐行 CLI;--continue 续上次会话。WebUI 已砍,少一层服务端。</span></div></div>
       </div>
       <div class="lite-badges">
-        <a class="badge-mini" href="https://github.com/LK-BLOG/pyclaw-lite" target="_blank" rel="noopener noreferrer">github.com/LK-BLOG/pyclaw-lite →</a>
+        <a class="badge-mini" href="lite/index.html" style="border-color:hsla(213,100%,65%,.45);color:#d6e6ff;background:hsla(213,100%,65%,.12)">前往 PyClaw Lite 官网 →</a>
+        <span class="badge-mini">2854 行</span>
+        <span class="badge-mini">v0.0.1-beta.2</span>
         <span class="badge-mini">GPL v3.0</span>
-        <span class="badge-mini">仅一个依赖</span>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:2px">
+        <a class="btn btn-secondary" href="lite/index.html" style="padding:11px 22px;font-size:14px">前往 PyClaw Lite 官网</a>
+        <a class="btn btn-secondary" href="https://github.com/LK-BLOG/pyclaw-lite" target="_blank" rel="noopener noreferrer" style="padding:11px 22px;font-size:14px">Lite · GitHub</a>
       </div>
     </div>
     <div class="terminal reveal d2">
@@ -442,7 +448,7 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
         <div class="term-dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>
         <button class="copy-btn" id="copyBtnLite">复制</button>
       </div>
-      <pre class="terminal-pre" style="min-height:auto;flex-direction:column;align-items:flex-start;gap:12px"><span><span class="prompt">$</span><span class="c2"> git clone https://github.com/LK-BLOG/pyclaw-lite</span></span><span><span class="prompt">$</span><span class="c2"> cd pyclaw-lite && pip install openai</span></span><span><span class="prompt">$</span><span class="c2"> cp pyclaw.json.example pyclaw.json</span></span><span><span class="prompt">$</span><span class="c1"> python main.py</span></span><span class="cmt"># 或者 Web UI:python webui.py → http://localhost:8765</span></pre>
+      <pre class="terminal-pre" style="min-height:auto;flex-direction:column;align-items:flex-start;gap:12px"><span><span class="prompt">$</span><span class="c2"> git clone https://github.com/LK-BLOG/pyclaw-lite</span></span><span><span class="prompt">$</span><span class="c2"> cd pyclaw-lite && ./install.sh</span></span><span><span class="prompt">$</span><span class="c2"> cp pyclaw.json.example pyclaw.json   # 填 KEY</span></span><span><span class="prompt">$</span><span class="c1"> python main.py</span></span><span class="cmt"># --plain 极简 CLI · --continue 续上次 · --session 指定会话</span></pre>
     </div>
   </div>
 </section>
@@ -543,6 +549,7 @@ a.badge-mini:hover{border-color:var(--border-strong);color:var(--text-primary);b
         <div class="col">
           <b>项目</b>
           <a href="https://github.com/LK-BLOG/PyClaw" target="_blank" rel="noopener noreferrer">PyClaw · 完整版</a>
+          <a href="lite/index.html">PyClaw Lite · 官网</a>
           <a href="https://github.com/LK-BLOG/pyclaw-lite" target="_blank" rel="noopener noreferrer">PyClaw Lite · 轻量版</a>
           <a href="https://github.com/LK-BLOG/F-kAgent" target="_blank" rel="noopener noreferrer">FuckAgent · 情绪发泄按钮</a>
         </div>
@@ -593,7 +600,7 @@ document.getElementById('copyBtn2').addEventListener('click',e=>{
   copyText('curl -fsSL https://raw.githubusercontent.com/LK-BLOG/PyClaw/main/install.sh | bash',e.currentTarget);
 });
 document.getElementById('copyBtnLite').addEventListener('click',e=>{
-  copyText('git clone https://github.com/LK-BLOG/pyclaw-lite\ncd pyclaw-lite && pip install openai\npython main.py',e.currentTarget);
+  copyText('git clone https://github.com/LK-BLOG/pyclaw-lite\ncd pyclaw-lite && ./install.sh\ncp pyclaw.json.example pyclaw.json\npython main.py',e.currentTarget);
 });
 
 // 滚动入场:视口内立即显示 + IO 滚动触发
